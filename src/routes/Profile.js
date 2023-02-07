@@ -4,7 +4,7 @@ import { collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import { updateProfile } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
-function Profile({ userObj }) {
+function Profile({ userObj, refreshUser }) {
   const [newNameValue, setNewNameValue] = useState(userObj.displayName);
   const navigate = useNavigate(); // 위치조정 hook
   //로그아웃
@@ -20,11 +20,9 @@ function Profile({ userObj }) {
       where("creatorId", "==", userObj.uid)
     );
 
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => {
-      console.log(doc.id, doc.data());
-    });
+    await getDocs(q);
   };
+
   useEffect(() => {
     getMyTweet();
   }, []);
@@ -38,8 +36,9 @@ function Profile({ userObj }) {
   const onSubmit = async (event) => {
     event.preventDefault();
     if (userObj.displayName !== newNameValue) {
-      await updateProfile(userObj, { displayName: newNameValue });
+      await updateProfile(auth.currentUser, { displayName: newNameValue });
     }
+    refreshUser();
   };
   return (
     <>
